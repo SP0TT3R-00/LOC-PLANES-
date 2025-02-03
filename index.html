@@ -12,7 +12,7 @@
             height: 30px;
             background-image: url('https://cdn-icons-png.flaticon.com/512/2114/2114933.png');
             background-size: cover;
-            cursor: pointer;
+            cursor: url('https://cdn-icons-png.flaticon.com/512/2114/2114933.png') 16 16, auto;
         }
     </style>
 </head>
@@ -32,9 +32,7 @@
         let aircraftMarkers = [];
         let flightPaths = {}; // Pour stocker les traces de chaque avion
         let currentPathMarkers = {}; // Pour gérer le tracé affiché sur demande
-
-        // Mise à jour du curseur pour l'icône avion
-        map.getContainer().style.cursor = 'url(https://cdn-icons-png.flaticon.com/512/2114/2114933.png), auto';
+        let clickedAirplanes = {}; // Pour savoir si un avion a été cliqué ou non
 
         // Récupération des données des avions
         function fetchAircraftData() {
@@ -61,11 +59,17 @@
                                 }).addTo(map)
                                   .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`)
                                   .on('click', function() {
-                                      // Au clic, afficher ou cacher la trajectoire
-                                      if (!currentPathMarkers[callsign]) {
-                                          currentPathMarkers[callsign] = L.polyline([], { color: 'blue' }).addTo(map);
+                                      // Toggle pour afficher ou cacher le tracé
+                                      if (clickedAirplanes[callsign]) {
+                                          map.removeLayer(currentPathMarkers[callsign]); // Retirer le tracé
+                                          clickedAirplanes[callsign] = false;
+                                      } else {
+                                          if (!currentPathMarkers[callsign]) {
+                                              currentPathMarkers[callsign] = L.polyline([], { color: 'blue' }).addTo(map);
+                                          }
+                                          currentPathMarkers[callsign].setLatLngs(flightPaths[callsign]);
+                                          clickedAirplanes[callsign] = true;
                                       }
-                                      currentPathMarkers[callsign].setLatLngs(flightPaths[callsign]);
                                   });
 
                                 aircraftMarkers.push(marker);
