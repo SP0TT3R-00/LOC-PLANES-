@@ -24,6 +24,7 @@
 
         let aircraftMarkers = [];
 
+        // Récupération des données des avions
         function fetchAircraftData() {
             fetch('https://opensky-network.org/api/states/all')
                 .then(response => response.json())
@@ -40,7 +41,8 @@
                             let callsign = state[1] ? state[1].trim() : "Inconnu";
                             let altitude = state[7] ? state[7] + " m" : "N/A";
 
-                            if (lat && lon) {
+                            // Filtre les avions dont l'indicatif commence par 'CTM'
+                            if (callsign.startsWith("CTM") && lat && lon) {
                                 let marker = L.marker([lat, lon]).addTo(map)
                                     .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
 
