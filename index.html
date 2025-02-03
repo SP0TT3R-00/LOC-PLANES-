@@ -23,6 +23,7 @@
         }).addTo(map);
 
         let aircraftMarkers = [];
+        let flightPaths = {}; // Pour stocker les traces de chaque avion
 
         // Récupération des données des avions
         function fetchAircraftData() {
@@ -41,15 +42,22 @@
                             let callsign = state[1] ? state[1].trim() : "Inconnu";
                             let altitude = state[7] ? state[7] + " m" : "N/A";
 
-                            // Affichage des indicatifs pour vérifier
-                            console.log("Indicatif:", callsign); // Cette ligne affiche tous les indicatifs dans la console
-
                             // Filtre les avions dont l'indicatif commence par 'CTM'
                             if (callsign.startsWith("CTM") && lat && lon) {
+                                // Ajout du marqueur pour l'avion
                                 let marker = L.marker([lat, lon]).addTo(map)
                                     .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
 
                                 aircraftMarkers.push(marker);
+
+                                // Si c'est un avion que nous suivons, ajouter sa position à son tracé
+                                if (!flightPaths[callsign]) {
+                                    flightPaths[callsign] = [];
+                                }
+                                flightPaths[callsign].push([lat, lon]);
+
+                                // Afficher la trace de l'avion sur la carte
+                                L.polyline(flightPaths[callsign], { color: 'blue' }).addTo(map);
                             }
                         });
                     }
