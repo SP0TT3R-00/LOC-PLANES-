@@ -3,10 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi des avions en temps réel</title>
+    <title>Suivi des avions CTM en temps réel</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         #map { height: 100vh; }
+        .airplane-icon {
+            width: 30px;
+            height: 30px;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/2114/2114933.png');
+            background-size: cover;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -24,6 +31,10 @@
 
         let aircraftMarkers = [];
         let flightPaths = {}; // Pour stocker les traces de chaque avion
+        let currentPathMarkers = {}; // Pour gérer le tracé affiché sur demande
+
+        // Mise à jour du curseur pour l'icône avion
+        map.getContainer().style.cursor = 'url(https://cdn-icons-png.flaticon.com/512/2114/2114933.png), auto';
 
         // Récupération des données des avions
         function fetchAircraftData() {
@@ -45,8 +56,17 @@
                             // Filtre les avions dont l'indicatif commence par 'CTM'
                             if (callsign.startsWith("CTM") && lat && lon) {
                                 // Ajout du marqueur pour l'avion
-                                let marker = L.marker([lat, lon]).addTo(map)
-                                    .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
+                                let marker = L.marker([lat, lon], {
+                                    icon: L.divIcon({ className: 'airplane-icon' })
+                                }).addTo(map)
+                                  .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`)
+                                  .on('click', function() {
+                                      // Au clic, afficher ou cacher la trajectoire
+                                      if (!currentPathMarkers[callsign]) {
+                                          currentPathMarkers[callsign] = L.polyline([], { color: 'blue' }).addTo(map);
+                                      }
+                                      currentPathMarkers[callsign].setLatLngs(flightPaths[callsign]);
+                                  });
 
                                 aircraftMarkers.push(marker);
 
