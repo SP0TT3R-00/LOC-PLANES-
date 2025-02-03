@@ -12,7 +12,6 @@
             height: 30px;
             background-image: url('https://cdn-icons-png.flaticon.com/512/2114/2114933.png');
             background-size: cover;
-            cursor: url('https://cdn-icons-png.flaticon.com/512/2114/2114933.png') 16 16, auto;
         }
     </style>
 </head>
@@ -34,7 +33,7 @@
         let currentPathMarkers = {}; // Pour gérer le tracé affiché sur demande
         let clickedAirplanes = {}; // Pour savoir si un avion a été cliqué ou non
 
-        // Récupération des données des avions
+        // Récupération des données des avions depuis l'API OpenSky
         function fetchAircraftData() {
             fetch('https://opensky-network.org/api/states/all')
                 .then(response => response.json())
