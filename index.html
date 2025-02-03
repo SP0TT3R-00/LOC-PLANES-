@@ -41,6 +41,9 @@
                             let callsign = state[1] ? state[1].trim() : "Inconnu";
                             let altitude = state[7] ? state[7] + " m" : "N/A";
 
+                            // Affichage des indicatifs pour vérifier
+                            console.log("Indicatif:", callsign); // Cette ligne affiche tous les indicatifs dans la console
+
                             // Filtre les avions dont l'indicatif commence par 'CTM'
                             if (callsign.startsWith("CTM") && lat && lon) {
                                 let marker = L.marker([lat, lon]).addTo(map)
