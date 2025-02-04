@@ -8,10 +8,11 @@
     <style>
         #map { height: 100vh; }
         .airplane-icon {
-            width: 30px;
-            height: 30px;
-            background-image: url('https://cdn-icons-png.flaticon.com/512/2114/2114933.png');
-            background-size: cover;
+            width: 50px; /* Taille de l'icône ajustée */
+            height: 50px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/6/67/Jet_aircraft_icon.svg'); /* Image d'avion plus réaliste */
+            background-size: contain; /* L'image s'ajuste correctement à la taille de l'icône */
+            background-repeat: no-repeat;
         }
     </style>
 </head>
@@ -90,7 +91,7 @@
 
         // Récupération des données toutes les 10 secondes
         fetchAircraftData();
-        setInterval(fetchAircraftData, 10000);
+        setInterval(fetchAircraftData, 5000);
     </script>
 </body>
 </html>
