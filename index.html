@@ -8,10 +8,10 @@
     <style>
         #map { height: 100vh; }
         .airplane-icon {
-            width: 50px; /* Taille de l'icône ajustée */
-            height: 50px;
-            background-image: url('https://images.app.goo.gl/ZuVkt3HzJJfw8pxs7'); /* Image d'avion plus réaliste */
-            background-size: contain; /* L'image s'ajuste correctement à la taille de l'icône */
+            width: 32px;
+            height: 32px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/Airplane_silhouette.png');
+            background-size: contain;
             background-repeat: no-repeat;
         }
     </style>
@@ -22,76 +22,83 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
         // Initialisation de la carte
-        var map = L.map('map').setView([48.8566, 2.3522], 5); // Centrée sur la France
+        var map = L.map('map').setView([48.8566, 2.3522], 5); // France
 
         // Ajout du fond de carte OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        let aircraftMarkers = [];
-        let flightPaths = {}; // Pour stocker les traces de chaque avion
-        let currentPathMarkers = {}; // Pour gérer le tracé affiché sur demande
-        let clickedAirplanes = {}; // Pour savoir si un avion a été cliqué ou non
+        let aircraftMarkers = {}; // Stocker les marqueurs par callsign
+        let flightPaths = {}; // Stocker les traces de chaque avion
+        let pathPolylines = {}; // Stocker les polylignes de chaque avion
 
-        // Récupération des données des avions depuis l'API OpenSky
+        // Fonction pour récupérer les données
         function fetchAircraftData() {
             fetch('https://opensky-network.org/api/states/all')
                 .then(response => response.json())
                 .then(data => {
-                    // Suppression des anciens marqueurs
-                    aircraftMarkers.forEach(marker => map.removeLayer(marker));
-                    aircraftMarkers = [];
-
-                    // Vérification que des données sont reçues
                     if (data && data.states) {
+                        let updatedAircrafts = new Set();
+
                         data.states.forEach(state => {
                             let lat = state[6];
                             let lon = state[5];
                             let callsign = state[1] ? state[1].trim() : "Inconnu";
                             let altitude = state[7] ? state[7] + " m" : "N/A";
 
-                            // Filtre les avions dont l'indicatif commence par 'CTM'
                             if (callsign.startsWith("CTM") && lat && lon) {
-                                // Ajout du marqueur pour l'avion
-                                let marker = L.marker([lat, lon], {
-                                    icon: L.divIcon({ className: 'airplane-icon' })
-                                }).addTo(map)
-                                  .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`)
-                                  .on('click', function() {
-                                      // Toggle pour afficher ou cacher le tracé
-                                      if (clickedAirplanes[callsign]) {
-                                          map.removeLayer(currentPathMarkers[callsign]); // Retirer le tracé
-                                          clickedAirplanes[callsign] = false;
-                                      } else {
-                                          if (!currentPathMarkers[callsign]) {
-                                              currentPathMarkers[callsign] = L.polyline([], { color: 'blue' }).addTo(map);
-                                          }
-                                          currentPathMarkers[callsign].setLatLngs(flightPaths[callsign]);
-                                          clickedAirplanes[callsign] = true;
-                                      }
-                                  });
+                                updatedAircrafts.add(callsign);
 
-                                aircraftMarkers.push(marker);
+                                // Mise à jour ou ajout du marqueur
+                                if (aircraftMarkers[callsign]) {
+                                    aircraftMarkers[callsign].setLatLng([lat, lon]);
+                                } else {
+                                    aircraftMarkers[callsign] = L.marker([lat, lon], {
+                                        icon: L.divIcon({ className: 'airplane-icon' })
+                                    }).addTo(map)
+                                      .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
+                                }
 
-                                // Si c'est un avion que nous suivons, ajouter sa position à son tracé
+                                // Mise à jour des tracés
                                 if (!flightPaths[callsign]) {
                                     flightPaths[callsign] = [];
                                 }
-                                flightPaths[callsign].push([lat, lon]);
 
-                                // Afficher la trace de l'avion sur la carte
-                                L.polyline(flightPaths[callsign], { color: 'blue' }).addTo(map);
+                                let lastPosition = flightPaths[callsign].slice(-1)[0];
+                                if (!lastPosition || lastPosition[0] !== lat || lastPosition[1] !== lon) {
+                                    flightPaths[callsign].push([lat, lon]);
+                                }
+
+                                // Mise à jour ou création de la polyligne
+                                if (pathPolylines[callsign]) {
+                                    pathPolylines[callsign].setLatLngs(flightPaths[callsign]);
+                                } else {
+                                    pathPolylines[callsign] = L.polyline(flightPaths[callsign], { color: 'blue' }).addTo(map);
+                                }
+                            }
+                        });
+
+                        // Suppression des avions qui ne sont plus dans les données
+                        Object.keys(aircraftMarkers).forEach(callsign => {
+                            if (!updatedAircrafts.has(callsign)) {
+                                map.removeLayer(aircraftMarkers[callsign]);
+                                delete aircraftMarkers[callsign];
+                                map.removeLayer(pathPolylines[callsign]);
+                                delete pathPolylines[callsign];
+                                delete flightPaths[callsign];
                             }
                         });
                     }
                 })
-                .catch(error => console.log("Erreur de récupération des données : ", error));
+                .catch(error => console.error("Erreur de récupération des données : ", error));
         }
 
-        // Récupération des données toutes les 10 secondes
-        fetchAircraftData();
+        // Rafraîchissement des données toutes les 5 secondes
         setInterval(fetchAircraftData, 5000);
+
+        // Chargement initial
+        fetchAircraftData();
     </script>
 </body>
 </html>
