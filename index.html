@@ -22,18 +22,15 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Définition de l'icône d'avion
+        // Définition de l'icône d'avion (Nouvelle URL)
         let airplaneIcon = L.icon({
-            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Airplane_silhouette.png', // Image d'avion
+            iconUrl: 'https://cdn-icons-png.flaticon.com/128/2284/2284874.png', // Icône d'avion valide
             iconSize: [32, 32],  // Taille ajustée
             iconAnchor: [16, 16]  // Centre de l'icône aligné sur la position
         });
 
         let aircraftMarkers = {}; // Stocker les marqueurs par callsign
-        let flightPaths = {}; // Stocker les traces de chaque avion
-        let pathPolylines = {}; // Stocker les polylignes de chaque avion
 
-        // Fonction pour récupérer les données
         function fetchAircraftData() {
             fetch('https://opensky-network.org/api/states/all')
                 .then(response => response.json())
@@ -50,30 +47,13 @@
                             if (callsign.startsWith("CTM") && lat && lon) {
                                 updatedAircrafts.add(callsign);
 
-                                // Mise à jour ou ajout du marqueur
+                                // Ajout ou mise à jour du marqueur
                                 if (aircraftMarkers[callsign]) {
                                     aircraftMarkers[callsign].setLatLng([lat, lon]);
                                 } else {
                                     aircraftMarkers[callsign] = L.marker([lat, lon], { icon: airplaneIcon })
                                         .addTo(map)
                                         .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
-                                }
-
-                                // Mise à jour des tracés
-                                if (!flightPaths[callsign]) {
-                                    flightPaths[callsign] = [];
-                                }
-
-                                let lastPosition = flightPaths[callsign].slice(-1)[0];
-                                if (!lastPosition || lastPosition[0] !== lat || lastPosition[1] !== lon) {
-                                    flightPaths[callsign].push([lat, lon]);
-                                }
-
-                                // Mise à jour ou création de la polyligne
-                                if (pathPolylines[callsign]) {
-                                    pathPolylines[callsign].setLatLngs(flightPaths[callsign]);
-                                } else {
-                                    pathPolylines[callsign] = L.polyline(flightPaths[callsign], { color: 'blue' }).addTo(map);
                                 }
                             }
                         });
@@ -83,9 +63,6 @@
                             if (!updatedAircrafts.has(callsign)) {
                                 map.removeLayer(aircraftMarkers[callsign]);
                                 delete aircraftMarkers[callsign];
-                                map.removeLayer(pathPolylines[callsign]);
-                                delete pathPolylines[callsign];
-                                delete flightPaths[callsign];
                             }
                         });
                     }
