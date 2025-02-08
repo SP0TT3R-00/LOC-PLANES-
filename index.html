@@ -14,6 +14,15 @@
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
+        // Liste simplifiée d'aéroports (code IATA, nom et coordonnées)
+        const airports = {
+            "LFPG": { name: "Aéroport Charles de Gaulle (Paris)", lat: 49.0097, lon: 2.5479 },
+            "LFMN": { name: "Aéroport de Nice-Côte d'Azur (Nice)", lat: 43.6653, lon: 7.2165 },
+            "EGLL": { name: "Aéroport de Heathrow (Londres)", lat: 51.4700, lon: -0.4543 },
+            "EDDF": { name: "Aéroport de Francfort (Francfort)", lat: 50.0379, lon: 8.5622 },
+            // Ajouter d'autres aéroports ici
+        };
+
         // Initialisation de la carte
         var map = L.map('map').setView([48.8566, 2.3522], 5); // Centrée sur la France
 
@@ -33,6 +42,18 @@
         let flightPaths = {}; // Stocker les tracés
         let pathPolylines = {}; // Polylignes des tracés
 
+        // Calcul de la distance entre deux points géographiques (en km)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Rayon de la Terre en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Retourne la distance en km
+        }
+
         function fetchAircraftData() {
             fetch('https://opensky-network.org/api/states/all')
                 .then(response => response.json())
@@ -49,13 +70,25 @@
                             if (callsign.startsWith("CTM") && lat && lon) {
                                 updatedAircrafts.add(callsign);
 
+                                // Trouver l'aéroport de départ le plus proche
+                                let closestAirport = null;
+                                let minDistance = Infinity;
+                                for (let code in airports) {
+                                    let airport = airports[code];
+                                    let distance = calculateDistance(lat, lon, airport.lat, airport.lon);
+                                    if (distance < minDistance) {
+                                        minDistance = distance;
+                                        closestAirport = airport;
+                                    }
+                                }
+
                                 // Mise à jour ou création du marqueur
                                 if (aircraftMarkers[callsign]) {
                                     aircraftMarkers[callsign].setLatLng([lat, lon]);
                                 } else {
                                     aircraftMarkers[callsign] = L.marker([lat, lon], { icon: airplaneIcon })
                                         .addTo(map)
-                                        .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
+                                        .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}<br>Départ de: ${closestAirport ? closestAirport.name : 'Inconnu'}`);
                                 }
 
                                 // Ajout de la position au tracé
