@@ -7,13 +7,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
         #map { height: 100vh; }
-        .airplane-icon {
-            width: 32px;
-            height: 32px;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/Airplane_silhouette.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
     </style>
 </head>
 <body>
@@ -22,12 +15,19 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
         // Initialisation de la carte
-        var map = L.map('map').setView([48.8566, 2.3522], 5); // France
+        var map = L.map('map').setView([48.8566, 2.3522], 5); // Centrée sur la France
 
         // Ajout du fond de carte OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        // Définition de l'icône d'avion
+        let airplaneIcon = L.icon({
+            iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/Airplane_silhouette.png', // Image d'avion
+            iconSize: [32, 32],  // Taille ajustée
+            iconAnchor: [16, 16]  // Centre de l'icône aligné sur la position
+        });
 
         let aircraftMarkers = {}; // Stocker les marqueurs par callsign
         let flightPaths = {}; // Stocker les traces de chaque avion
@@ -54,10 +54,9 @@
                                 if (aircraftMarkers[callsign]) {
                                     aircraftMarkers[callsign].setLatLng([lat, lon]);
                                 } else {
-                                    aircraftMarkers[callsign] = L.marker([lat, lon], {
-                                        icon: L.divIcon({ className: 'airplane-icon' })
-                                    }).addTo(map)
-                                      .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
+                                    aircraftMarkers[callsign] = L.marker([lat, lon], { icon: airplaneIcon })
+                                        .addTo(map)
+                                        .bindPopup(`<b>${callsign}</b><br>Altitude: ${altitude}`);
                                 }
 
                                 // Mise à jour des tracés
