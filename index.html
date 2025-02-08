@@ -14,13 +14,32 @@
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Liste simplifiée d'aéroports (code IATA, nom et coordonnées)
+        // Liste des aéroports et bases aériennes de France (ajout des nouveaux)
         const airports = {
             "LFPG": { name: "Aéroport Charles de Gaulle (Paris)", lat: 49.0097, lon: 2.5479 },
             "LFMN": { name: "Aéroport de Nice-Côte d'Azur (Nice)", lat: 43.6653, lon: 7.2165 },
-            "EGLL": { name: "Aéroport de Heathrow (Londres)", lat: 51.4700, lon: -0.4543 },
-            "EDDF": { name: "Aéroport de Francfort (Francfort)", lat: 50.0379, lon: 8.5622 },
-            // Ajouter d'autres aéroports ici
+            "LFLL": { name: "Aéroport de Lyon-Saint-Exupéry", lat: 45.7254, lon: 5.0818 },
+            "LFBO": { name: "Aéroport de Toulouse-Blagnac", lat: 43.6297, lon: 1.3630 },
+            "LFBT": { name: "Aéroport de Brest-Bretagne", lat: 48.4479, lon: -4.4165 },
+            "LFSB": { name: "Aéroport de Bâle-Mulhouse-Fribourg", lat: 47.5905, lon: 7.5295 },
+            "LFBZ": { name: "Aéroport de Metz-Nancy-Lorraine", lat: 49.0964, lon: 6.1794 },
+            "LFRB": { name: "Aéroport de Brest", lat: 48.4465, lon: -4.4050 },
+            "LFST": { name: "Aéroport de Strasbourg", lat: 48.5384, lon: 7.6124 },
+            "LFRN": { name: "Base aérienne 102 Dijon-Longvic (militaire)", lat: 47.3344, lon: 5.1189 },
+            "LFRM": { name: "Base aérienne 115 Orange-Caritat (militaire)", lat: 44.1361, lon: 4.8031 },
+            "LFGJ": { name: "Base aérienne 118 Mont-de-Marsan (militaire)", lat: 43.8881, lon: -0.6934 },
+            "LFPN": { name: "Base aérienne 110 Creil (militaire)", lat: 49.2747, lon: 2.4878 },
+            "LFRL": { name: "Base aérienne 103 Cambrai-Epinoy (militaire)", lat: 50.1783, lon: 3.2439 },
+            "LFBD": { name: "Aéroport de Bordeaux-Mérignac", lat: 44.8292, lon: -0.7136 },  // Aéroport de Bordeaux
+            "LFOE": { name: "Base aérienne 105 Evreux-Fauville (militaire)", lat: 49.0278, lon: 1.1561 },  // Base d'Evreux
+            "LFSN": { name: "Base aérienne 133 Nancy-Ochey (militaire)", lat: 48.6642, lon: 6.1359 },  // Base de Nancy
+            "LFRK": { name: "Base aérienne 702 Avord (militaire)", lat: 47.2375, lon: 2.6411 },  // Base d'Avord
+            "LFSD": { name: "Base aérienne 921 Saint-Didier (militaire)", lat: 43.6753, lon: 5.0128 },  // Base de Saint Didier
+            "LFMI": { name: "Base aérienne 125 Istres-Le Tubé (militaire)", lat: 43.5173, lon: 4.9494 },  // Base d'Istres
+            "LFOU": { name: "Base aérienne 123 Orléans-Bricy (militaire)", lat: 47.9511, lon: 2.0639 },  // Base aérienne d'Orléans
+            "LFQO": { name: "Base aérienne 113 Saint-Dizier-Robinson (militaire)", lat: 48.5564, lon: 4.7747 },  // Base de Saint-Dizier
+            "ETAR": { name: "Base aérienne 1 Ramstein (militaire)", lat: 49.4372, lon: 7.6004 },  // Base aérienne de Ramstein
+            "LFPV": { name: "Base aérienne 107 Villacoublay (militaire)", lat: 48.7539, lon: 2.1478 }  // Base de Villacoublay
         };
 
         // Initialisation de la carte
